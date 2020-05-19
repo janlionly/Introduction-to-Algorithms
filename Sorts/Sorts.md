@@ -1,3 +1,5 @@
+
+
 # Sorts(从小到大)
 
 ## 1. Insertion-Sort
@@ -63,7 +65,7 @@ func insertionSort(array: inout [Int]) {
   | 7&#8195;&#8195;K | 7&#8195;&#8195;K | 7&#8195;&#8195;K | 7&#8195;&#8195;K | _&#8195;&#8195;K | _&#8195;&#8195;K | _&#8195;&#8195;_ |
   | Gt&#8195;&#8195;Gt | Gt&#8195;&#8195;Gt | Gt&#8195;&#8195;Gt | Gt&#8195;&#8195;Gt | Gt&#8195;&#8195;Gt | Gt&#8195;&#8195;Gt | Gt&#8195;&#8195;Gt |
 
-  ```swift
+```swift
   func merge(_ array: inout [Int], _ leftIndex: Int, _ midIndex: Int, _ rightIndex: Int) {
     let max = Int.max
     var lefts = Array(array[leftIndex...midIndex])
@@ -83,11 +85,11 @@ func insertionSort(array: inout [Int]) {
       }
     }
   }
-  ```
+```
 
-  __递归地将一个待排序的序列对半拆分成两个待排序的子序列, 直到子序列长度为1为止__:
+__递归地将一个待排序的序列对半拆分成两个待排序的子序列, 直到子序列长度为1为止__:
 
-  ```swift
+```swift
   func mergeSort(_ array: inout [Int], leftIndex: Int, rightIndex: Int) {
     if leftIndex == rightIndex { // 当序列长度为1时无法再拆分,返回
       return
@@ -97,17 +99,120 @@ func insertionSort(array: inout [Int]) {
     mergeSort(&array, leftIndex: midIndex + 1, rightIndex: rightIndex)
     merge(&array, leftIndex, midIndex, rightIndex)
   }
-  ```
+```
 
-  ### 时间复杂度
+### 时间复杂度
 
-  设T(n)为算法需要执行的总步数, 归并拆分为两个规模为n/2的步数和一个merge操作所需步数, 可以看出merge操作的是关于n的for循环,for循环体内的操作与n无关,为O(1),故merge操作为O(n), 所以有以下递归式:
+设T(n)为算法需要执行的总步数, 归并拆分为两个规模为n/2的步数和一个merge操作所需步数, 可以看出merge操作的是关于n的for循环,for循环体内的操作与n无关,为O(1),故merge操作为O(n), 所以有以下递归式:
 
-  T(n) = 2*T(n/2) + O(n)
+T(n) = 2*T(n/2) + O(n)
 
-  T(1) = O(1)
+T(1) = O(1)
 
-  用此递归式可以构建出一棵lgn层的树(规模为n每次拆为均分的两段, 最多执行lgn次可以拆分为长度为1的两段), 此树每层的复杂度为cn,故总的复杂度为T(n) = lgn * cn = O(n*lgn)
+用此递归式可以构建出一棵lgn层的树(规模为n每次拆为均分的两段, 最多执行lgn次可以拆分为长度为1的两段), 此树每层的复杂度为cn,故总的复杂度为T(n) = lgn * cn = O(n*lgn)
+
+
+## 3. Bubble-Sort
+
+冒泡排序：重复地走访要排序的元素列，依次比较相邻的元素执行交换，一趟下来就可以筛选出最小值，对剩余的元素列重新执行以上步骤，直到筛选完全部。
+
+### 分解
+
+```instruction
+1. 对元素列从尾到头开始，依次比较相邻元素，每次将右边较小者和左边较大者进行交换位置；
+2. 除开最左边已经筛选出的元素，对剩下的元素列重复步骤1的操作。
+```
+
+- 演示图
+  
+  - 5，2，10，9，6，3，7
+  - 5，2，10，9，***3***，***6***，7
+  - 5，2，10，***3***，***9***，6，7
+  - 5，2，***3***，***10***，9，6，7
+  - ***2***，***5***，3，10，9，6，7
+  - 2（5，3，10，9，6，7）对括号内的元素列重复以上步骤。
+
+```swift
+func bubbleSort(_ array: inout [Int]) {
+  for i in 0..<array.count-1 { // n个元素，进行n-1趟的筛选比较可以完成
+    for j in (i+1..<array.count).revesed() {
+      if array[j-1]>array[j] {
+        (array[j-1], array[j]) = (array[j], array[j-1])
+      }
+    }
+  } 
+}
+```
+
+
+
+## 4. Quick-Sort
+
+快速排序：将一个序列A[p...r]拆分成两个子序列（可能为空）A[p...q-1]和A[q+1...r]，使得A[p...q-1]的元素都小于等于A[q], A[q+1...r]的元素都大于等于A[q], 对A[p...q-1]和A[q+1...r]执行以上同样的操作。
+
+### 分解
+
+```instruction
+1. 将一个序列A[p...r]拆分成两个子序列（可能为空）A[p...q-1]和A[q+1...r]，使得A[p...q-1]的元素都小于等于A[q], A[q+1...r]的元素都大于等于A[q];
+2. A[p...q-1]和A[q+1...r]执行以上步骤1同样的操作；
+```
+
+步骤1：【V1版本】选择A[r]作为要比较的中间元素key，遍历A[p...***r-1***]的每个元素，将小于等于key的元素放入数组L，将大于key的元素放入数组R，然后遍历数组L(k1)的元素，将其放入A[p...x], 将key插入A[x+1], 将R(k2)的元素放入A[x+2...r], 此时对于的key下标q即为x+1.
+```swift
+func partition(_ array: inout [Int], p: Int, r: Int) -> Int {
+  let key = A[r]
+  var L: [Int] = []
+  var R: [Int] = []
+  var targetIndex = 0
+  
+  for i in (p...r-1) { // A[r]已经拿出来做key，故下标取到r-1
+    if A[i] <= key {
+      L.append(A[i])
+    } else {
+      R.append(A[i])
+    }
+  }
+  
+  var lindex = p
+  for i in 0..<L.count {
+    array[lindex] = L[i]
+    lindex += 1
+  }
+  array[lindex] = key
+  targetIndex = lindex
+  
+  var rindex = lindex + 1
+  for i in 0..<R.count {
+    array[rindex] = R[i]
+    rindex += 1
+  }
+  
+  return targetIndex
+}
+```
+
+步骤2： A[p...q-1]和A[q+1...r]执行以上步骤1同样的操作.
+
+```swift
+func quickSort(_ array: inout [Int], p: Int, r: Int) {
+  if lowIndex >= highIndex {
+    return
+  }
+  int q = partition(array, p, r)
+  quickSort(array, p, q-1)
+  quickSort(array, q+1, r)
+}
+```
+
+### 时间复杂度
+
+设T(n)为快速排序的总步骤，其中paritition的时间复杂度是O(n), 最坏情况下将序列拆分为两个子序列，长度分别是n-1和0，则：T(n) = T(n-1) + T(0) + O(n), 每一层被拆分为n-1步，需要拆分n次，故最坏情况时间复杂度为O(n^2), 最好情况下，序列被拆分为不大于n/2的两个子序列，此时T(n) = 2*T(n/2) + O(n), 则时间复杂度为O(nlgn).
+
+
+
+
+
+​    
 
   
 

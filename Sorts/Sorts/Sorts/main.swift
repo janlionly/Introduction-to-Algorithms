@@ -68,8 +68,8 @@ struct Sorts {
     func bubbleSort(array: inout [Int]) {
         for i in 0..<array.count - 1 {
             for j in (i+1..<array.count).reversed() {
-                if array[j - 1] > array[j] {
-                    (array[j - 1], array[j]) = (array[j], array[j - 1])
+                if array[j-1] > array[j] {
+                    (array[j-1], array[j]) = (array[j], array[j-1])
                 }
             }
         }
