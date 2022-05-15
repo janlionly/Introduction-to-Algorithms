@@ -31,6 +31,7 @@ func insertionSort(array: inout [Int]) {
     let key = array[j]
     var i = j - 1
     // move forward to find target index to insert
+    // 注意：此处用while循环控制内部的移动，而不要用for循环
     while i >= 0 && array[i] > key {
       array[i + 1] = array[i]
       i = i - 1
@@ -91,10 +92,13 @@ __递归地将一个待排序的序列对半拆分成两个待排序的子序列
 
 ```swift
   func mergeSort(_ array: inout [Int], leftIndex: Int, rightIndex: Int) {
-    if leftIndex == rightIndex { // 当序列长度为1时无法再拆分,返回
+    // 注意：当序列长度为1时无法再拆分,返回
+    if leftIndex == rightIndex { 
       return
     }
     let midIndex = (rightIndex + leftIndex)/2
+    // 注意：拆分一半是要用midIndex+1方式，而不要用midIndex-1方式拆分（会陷入无限循环）
+    // 在merge函数操作时亦是统一用midIndex+1区分两段
     mergeSort(&array, leftIndex: leftIndex, rightIndex: midIndex)
     mergeSort(&array, leftIndex: midIndex + 1, rightIndex: rightIndex)
     merge(&array, leftIndex, midIndex, rightIndex)
@@ -134,8 +138,9 @@ T(1) = O(1)
 
 ```swift
 func bubbleSort(_ array: inout [Int]) {
-  for i in 0..<array.count-1 { // n个元素，进行n-1趟的筛选比较可以完成
-    for j in (i+1..<array.count).revesed() {
+  // n个元素，进行n-1趟的筛选比较可以完成，注意：从1开始（用0开始会导致j-1导致越界）
+  for i in 1..<array.count-1 { 
+    for j in (i..<array.count).revesed() {
       if array[j-1]>array[j] {
         (array[j-1], array[j]) = (array[j], array[j-1])
       }
